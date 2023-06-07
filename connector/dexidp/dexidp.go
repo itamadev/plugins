@@ -36,7 +36,7 @@ func (d *Connector) Info() plugin.Info {
 		Description: plugin.MakeTranslator(i18n.InfoDescription),
 		Author:      "itamadev",
 		Version:     "0.0.1",
-		Link:        "https://github.com/answerdev/plugins/tree/main/connector/github",
+		Link:        "https://github.com/itamadev/plugins/tree/main/connector/dexidp",
 	}
 }
 

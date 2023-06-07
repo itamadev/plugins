@@ -1,5 +1,5 @@
 plugin:
-  github_connector:
+  dexidp_connector:
     backend:
       name:
         other: DexIdP
