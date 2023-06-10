@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/answerdev/answer/plugin"
-	"github.com/answerdev/plugins/connector/dexidp/i18n"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/google/go-github/github"
+	"github.com/itamadev/plugins/connector/dexidp/i18n"
 	"github.com/segmentfault/pacman/log"
 	"golang.org/x/oauth2"
 )
