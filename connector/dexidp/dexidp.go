@@ -19,8 +19,11 @@ type Connector struct {
 }
 
 type ConnectorConfig struct {
+	DexIssuer    string `json:"dex_issuer"`
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
+	AuthorizeUrl string `json:"authorize_url"`
+	TokenUrl     string `json:"token_url"`
 }
 
 func init() {
@@ -53,23 +56,33 @@ func (d *Connector) ConnectorSlugName() string {
 }
 
 func (d *Connector) ConnectorSender(ctx *plugin.GinContext, receiverURL string) (redirectURL string) {
+	provider, err := oidc.NewProvider(ctx, d.Config.DexIssuer)
+	if err != nil {
+		fmt.Errorf("failed to query provider %s: %v", d.Config.DexIssuer, err)
+		return ""
+	}
 	oauth2Config := &oauth2.Config{
 		ClientID:     d.Config.ClientID,
 		ClientSecret: d.Config.ClientSecret,
-		// Endpoint:     oauth2GitHub.Endpoint,
-		RedirectURL: receiverURL,
-		Scopes:      []string{oidc.ScopeOpenID, "profile", "email"},
+		Endpoint:     provider.Endpoint(),
+		RedirectURL:  receiverURL,
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email", "groups"},
 	}
 	return oauth2Config.AuthCodeURL("state")
 }
 
 func (d *Connector) ConnectorReceiver(ctx *plugin.GinContext, receiverURL string) (userInfo plugin.ExternalLoginUserInfo, err error) {
 	code := ctx.Query("code")
+	provider, err := oidc.NewProvider(ctx, d.Config.DexIssuer)
+	if err != nil {
+		fmt.Errorf("failed to query provider %s: %v", d.Config.DexIssuer, err)
+	}
+
 	// Exchange code for token
 	oauth2Config := &oauth2.Config{
 		ClientID:     d.Config.ClientID,
 		ClientSecret: d.Config.ClientSecret,
-		// Endpoint:     oauth2GitHub.Endpoint,
+		Endpoint:     provider.Endpoint(),
 	}
 	token, err := oauth2Config.Exchange(context.Background(), code)
 	if err != nil {
@@ -128,6 +141,39 @@ func (d *Connector) guaranteeEmail(email string, accessToken string) string {
 
 func (d *Connector) ConfigFields() []plugin.ConfigField {
 	return []plugin.ConfigField{
+		{
+			Name:        "dex_issuer",
+			Type:        plugin.ConfigTypeInput,
+			Title:       plugin.MakeTranslator(i18n.ConfigDexIssuerTitle),
+			Description: plugin.MakeTranslator(i18n.ConfigDexIssuerDescription),
+			Required:    true,
+			UIOptions: plugin.ConfigFieldUIOptions{
+				InputType: plugin.InputTypeText,
+			},
+			Value: d.Config.DexIssuer,
+		},
+		{
+			Name:        "auth_url",
+			Type:        plugin.ConfigTypeInput,
+			Title:       plugin.MakeTranslator(i18n.ConfigAuthURLTitle),
+			Description: plugin.MakeTranslator(i18n.ConfigAuthURLDescription),
+			Required:    true,
+			UIOptions: plugin.ConfigFieldUIOptions{
+				InputType: plugin.InputTypeText,
+			},
+			Value: d.Config.AuthorizeUrl,
+		},
+		{
+			Name:        "token_url",
+			Type:        plugin.ConfigTypeInput,
+			Title:       plugin.MakeTranslator(i18n.ConfigTokenURLTitle),
+			Description: plugin.MakeTranslator(i18n.ConfigTokenURLDescription),
+			Required:    true,
+			UIOptions: plugin.ConfigFieldUIOptions{
+				InputType: plugin.InputTypeText,
+			},
+			Value: d.Config.TokenUrl,
+		},
 		{
 			Name:        "client_id",
 			Type:        plugin.ConfigTypeInput,
