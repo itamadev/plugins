@@ -9,6 +9,21 @@ plugin:
         description:
           other: Connect to DexIdP for third-party login
       config:
+        dex_issuer:
+          title:
+            other: DexIssuer
+          description:
+            other: Issuer of your DexIdP application
+        auth_url:
+          title:
+            other: Authorize URL
+          description:
+            other: Authorize URL of your DexIdP application
+        token_url:
+          title:
+            other: TokenURL
+          description:
+            other: Token URL of your DexIdP application
         client_id:
           title:
             other: ClientID
