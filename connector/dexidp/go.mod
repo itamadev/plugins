@@ -1,4 +1,4 @@
-module github.com/answerdev/plugins/connector/dexidp
+module github.com/itamadev/plugins/connector/dexidp
 
 go 1.19
 
